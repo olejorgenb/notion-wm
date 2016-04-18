@@ -61,7 +61,7 @@
   (interactive "r")
   (notion-wm-run-notionflux (buffer-substring start end)))
 
-(defun notion-wm-send-line ()
+(defun notion-wm-send-current-line ()
   "Send send the actual line to notion, using the notionflux program."
   (interactive)
   (notion-wm-run-notionflux (buffer-substring (line-beginning-position) (line-end-position))))
