@@ -67,10 +67,11 @@ Each entry is either:
     :commands (notion-wm-mode)
     :config
     (progn
-      (spacemacs/set-leader-keys-for-major-mode 'lua-mode "sb" 'notion-wm-send-buffer)
-      (spacemacs/set-leader-keys-for-major-mode 'lua-mode "sf" 'notion-wm-send-proc)
-      (spacemacs/set-leader-keys-for-major-mode 'lua-mode "sl" 'notion-wm-send-current-line)
-      (spacemacs/set-leader-keys-for-major-mode 'lua-mode "sr" 'notion-wm-send-region))
+      ;; (spacemacs/set-leader-keys-for-major-mode 'notion-wm-mode "db" 'notion-wm-send-buffer)
+      (spacemacs/set-leader-keys-for-major-mode 'notion-wm-mode "sb" 'notion-wm-send-buffer)
+      (spacemacs/set-leader-keys-for-major-mode 'notion-wm-mode "sf" 'notion-wm-send-proc)
+      (spacemacs/set-leader-keys-for-major-mode 'notion-wm-mode "sl" 'notion-wm-send-current-line)
+      (spacemacs/set-leader-keys-for-major-mode 'notion-wm-mode "sr" 'notion-wm-send-region))
     )
   )
 
