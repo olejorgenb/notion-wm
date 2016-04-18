@@ -16,12 +16,14 @@
         'stop)))
 
 (defun company-notion-wm-inject-lua-helper ()
+  ;; lua5.2 -> _ENV, lua5.2 -> getfenv()
   (notion-wm-send-string
    "
       if emacs == undefined then
         emacs = {}
         function emacs.completion_candidates(str)
-          local completions = mod_query.do_complete_lua(getfunv(), str)
+          local env = _ENV or getfenv()
+          local completions = mod_query.do_complete_lua(env, str)
           return table.concat(completions, \" \")
         end
       end"
