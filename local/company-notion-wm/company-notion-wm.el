@@ -16,17 +16,13 @@
         'stop)))
 
 (defun company-notion-wm-inject-lua-helper ()
-  (notion-wm-send-string 
+  (notion-wm-send-string
    "
       if emacs == undefined then
         emacs = {}
         function emacs.completion_candidates(str)
-          completions = mod_query.do_complete_lua(_ENV, str)
-          el_list = ''
-          for i, c in ipairs(completions) do
-            el_list = el_list..c..' '
-          end
-          return el_list
+          local completions = mod_query.do_complete_lua(getfunv(), str)
+          return table.concat(completions, \" \")
         end
       end"
    ))
