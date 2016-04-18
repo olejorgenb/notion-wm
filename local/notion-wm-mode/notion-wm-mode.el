@@ -50,7 +50,7 @@
 
 
 (defun notion-wm-run-notionflux (cmd)
-  (shell-command-to-string (concat "/usr/lib/notion/bin/notionflux -e " (shell-quote-argument cmd))))
+  (shell-command-to-string (concat "notionflux -e " (shell-quote-argument cmd))))
 
 (defun notion-wm-send-string (str)
   "Send STR to notion, using the notionflux program."
