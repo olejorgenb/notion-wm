@@ -73,12 +73,21 @@ Each entry is either:
       (spacemacs/set-leader-keys-for-major-mode 'lua-mode "sl" 'notion-wm-send-current-line)
       (spacemacs/set-leader-keys-for-major-mode 'lua-mode "sr" 'notion-wm-send-region))
 
-      (require 'company)
-      (require 'company-notion-wm)
-      (add-hook 'notion-wm-mode-hook
-                (lambda () (setq-local company-backends '(company-notion-wm))))
+      ;; (require 'company)
+      ;; (require 'company-notion-wm)
+      ;; (add-hook 'notion-wm-mode-hook
+      ;;           (lambda () (setq-local company-backends '(company-notion-wm))))
     )
   )
+
+(defun notion-wm/init-notion-wm-mode ()
+  (use-package company-notion-wm
+    :defer t
+    :init 
+    (progn
+      ;; (require 'company)
+      (push 'company-notion-wm company-backends-notion-wm-mode)
+      )))
 
 ;; Doesn't work?
 (defun notion-wm/post-init-flycheck ()
