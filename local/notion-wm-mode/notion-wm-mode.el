@@ -177,7 +177,7 @@ The command is prefixed by a return statement."
 
 ;; bool WRegion.goto(WRegion reg)
 
-(provide 'notion)
+(provide 'notion-wm-mode)
 
 ;;; notion.el ends here
 

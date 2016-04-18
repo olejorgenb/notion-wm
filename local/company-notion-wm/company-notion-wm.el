@@ -31,7 +31,7 @@
       end"
    ))
 
-(defu company-notion-wm (command &optional arg &rest ignored)
+(defun company-notion-wm (command &optional arg &rest ignored)
   (interactive (list 'interactive))
   (cl-case command
     (interactive (company-begin-backend 'company-notion-wm))
