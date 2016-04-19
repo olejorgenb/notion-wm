@@ -1,10 +1,19 @@
 
+(defun company-notion-wm--completion-contex-at-point ()
+    "Get current Name { ['.'|':'} Name } sequence."
+    ;; Taken from lua-mode.el
+    ;; NB: copying/modifying syntax table for each call may incur a penalty
+    (with-syntax-table (copy-syntax-table)
+      (modify-syntax-entry ?. "_")
+      (modify-syntax-entry ?: "_")
+      (current-word t)))
+
 (defun company-notion-wm--candidates ()
   "Candidates handler for the company backend."
   (cons :async
         (lambda (cb)
-          (company-notion-wm-inject-lua-helper)
-          (let* ((context (lua-funcname-at-point))
+          (company-notion-wm--inject-lua-helper)
+          (let* ((context (company-notion-wm--completion-contex-at-point))
                  (raw-result (notion-wm-cmd
                               (format "emacs.completion_candidates(\"%s\")" context)))
                  (result (split-string (read raw-result))))
@@ -12,10 +21,13 @@
 
 (defun company-notion-wm--prefix ()
   (unless (company-in-string-or-comment)
-    (or (company-grab-symbol-cons "\\." 1)
+    ;; Trigger completion at once if the immediate left char is '.' or ':'
+    ;; (ignoring company-minimum-prefix-length).
+    ;; See 'prefix' documentation in company.el
+    (or (company-grab-symbol-cons "[.:]" 1)
         'stop)))
 
-(defun company-notion-wm-inject-lua-helper ()
+(defun company-notion-wm--inject-lua-helper ()
   ;; lua5.2 -> _ENV, lua5.2 -> getfenv()
   (notion-wm-send-string
    "
