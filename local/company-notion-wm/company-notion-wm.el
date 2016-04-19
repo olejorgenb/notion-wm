@@ -34,6 +34,8 @@
   (cl-case command
     (interactive (company-begin-backend 'company-notion-wm))
     (prefix (company-notion-wm--prefix))
-    (candidates (company-notion-wm--candidates))))
+    (candidates (company-notion-wm--candidates))
+    (duplicates t)
+    (sorted nil)))
 
 (provide 'company-notion-wm)
