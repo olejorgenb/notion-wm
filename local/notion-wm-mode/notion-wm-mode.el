@@ -47,7 +47,8 @@
 ;; notion interaction via notionflux
 ;; --------------------------------------------------------------------------------
 
-
+(defvar notion-wm-documentation-url
+  "http://notion.sourceforge.net/notionconf/")
 
 (defun notion-wm-run-notionflux (cmd)
   (shell-command-to-string (concat "notionflux -e " (shell-quote-argument cmd))))
@@ -112,6 +113,14 @@ The command is prefixed by a return statement."
   (interactive (list (ido-completing-read "select: " (notion-wm-client-list))))
   (notion-wm-send-string (concat "WRegion.goto(ioncore.lookup_clientwin(\"" name "\"))")))
 
+(defun notion-wm-look-up-notion-function-at-point ()
+  (interactive)
+  ;; Documentation still uses ioncore instead of notioncore
+  (let* ((funcname (replace-regexp-in-string "^notioncore\\." "ioncore." (lua-funcname-at-point)))
+         (url (concat notion-wm-documentation-url
+                     "node7.html#fn:" funcname)))
+    (browse-url url))
+  )
 
 ;; --------------------------------------------------------------------------------
 ;; The notion edit mode, based on lua mode

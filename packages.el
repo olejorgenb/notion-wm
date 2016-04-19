@@ -71,7 +71,8 @@ Each entry is either:
       (spacemacs/set-leader-keys-for-major-mode 'notion-wm-mode "sb" 'notion-wm-send-buffer)
       (spacemacs/set-leader-keys-for-major-mode 'notion-wm-mode "sf" 'notion-wm-send-proc)
       (spacemacs/set-leader-keys-for-major-mode 'notion-wm-mode "sl" 'notion-wm-send-current-line)
-      (spacemacs/set-leader-keys-for-major-mode 'notion-wm-mode "sr" 'notion-wm-send-region))
+      (spacemacs/set-leader-keys-for-major-mode 'notion-wm-mode "sr" 'notion-wm-send-region)
+      (spacemacs/set-leader-keys-for-major-mode 'notion-wm-mode "hh" 'notion-wm-look-up-notion-function-at-point))
     )
   )
 
