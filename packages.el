@@ -73,7 +73,9 @@ Each entry is either:
         "sf" 'notion-wm-send-proc
         "sl" 'notion-wm-send-current-line
         "sr" 'notion-wm-send-region
-        "hh" 'notion-wm-look-up-notion-function-at-point))
+        "hh" 'notion-wm-look-up-notion-function-at-point)
+      (spacemacs/declare-prefix-for-mode 'notion-wm-mode "mh" "documentation")
+      (spacemacs/declare-prefix-for-mode 'notion-wm-mode "ms" "send to Notion"))
     )
   )
 
