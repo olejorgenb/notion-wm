@@ -133,7 +133,7 @@ The command is prefixed by a return statement."
   (interactive)
   ;; Documentation still uses ioncore instead of notioncore
   (let* ((funcname (replace-regexp-in-string "^notioncore\\." "ioncore."
-                                             (lua-funcname-at-point)))
+                                             (notion-wm-funcname-at-point)))
          (lua-req (format "return emacs.canonical_funcname(\"%s\")" funcname))
          (canonical-funcname (read (notion-wm-send-string lua-req))) ;; CLEANUP
          (url (concat notion-wm-documentation-url
