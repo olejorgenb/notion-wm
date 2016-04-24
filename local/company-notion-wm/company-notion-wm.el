@@ -1,19 +1,11 @@
 
-(defun company-notion-wm--completion-contex-at-point ()
-    "Get current Name { ['.'|':'} Name } sequence."
-    ;; Taken from lua-mode.el
-    ;; NB: copying/modifying syntax table for each call may incur a penalty
-    (with-syntax-table (copy-syntax-table)
-      (modify-syntax-entry ?. "_")
-      (modify-syntax-entry ?: "_")
-      (current-word t)))
 
 (defun company-notion-wm--candidates ()
   "Candidates handler for the company backend."
   (cons :async
         (lambda (cb)
           (company-notion-wm--inject-lua-helper)
-          (let* ((context (company-notion-wm--completion-contex-at-point))
+          (let* ((context (notion-wm--name-at-point))
                  (raw-result (notion-wm-cmd
                               (format "emacs.completion_candidates(\"%s\")" context)))
                  (result (split-string (read raw-result))))

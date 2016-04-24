@@ -50,6 +50,15 @@
 (defvar notion-wm-documentation-url
   "http://notion.sourceforge.net/notionconf/")
 
+(defun notion-wm--name-at-point ()
+  "Get current Name { ['.'|':'} Name } sequence."
+  ;; Taken from lua-mode.el
+  ;; NB: copying/modifying syntax table for each call may incur a penalty
+  (with-syntax-table (copy-syntax-table)
+    (modify-syntax-entry ?. "_")
+    (modify-syntax-entry ?: "_")
+    (current-word t)))
+
 (defun notion-wm--maybe-insert-result (result insert-result)
   (when insert-result
     (save-excursion
@@ -133,7 +142,7 @@ The command is prefixed by a return statement."
   (interactive)
   ;; Documentation still uses ioncore instead of notioncore
   (let* ((funcname (replace-regexp-in-string "^notioncore\\." "ioncore."
-                                             (notion-wm-funcname-at-point)))
+                                             (notion-wm--name-at-point)))
          (lua-req (format "return emacs.canonical_funcname(\"%s\")" funcname))
          (canonical-funcname (read (notion-wm-send-string lua-req))) ;; CLEANUP
          (url (concat notion-wm-documentation-url
