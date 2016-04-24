@@ -18,7 +18,7 @@ function emacs.pprint(obj)
 end
 
 function parse_fname(fname)
-  local dot = string.find(fname, ".", nil, true)
+  local dot = string.find(fname, "[.:]", nil)
   local tabpart, funpart
   if dot then
     tabpart = string.sub(fname, 1, dot-1)
