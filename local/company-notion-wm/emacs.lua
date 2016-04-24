@@ -29,6 +29,28 @@ function parse_fname(fname)
   return funpart, tabpart
 end
 
+
+function emacs.smart_loadstring(lua_code)
+  local fn, err = loadstring("return "..lua_code)
+  if not fn then
+    fn, err = loadstring(lua_code)
+  end
+  return fn, err
+end
+
+
+function emacs.eval(lua_code)
+  debug.print_line(lua_code)
+  fn, err = emacs.smart_loadstring(lua_code)
+  if err then
+    error(err)
+  else
+    return fn()
+  end
+end
+
+
+
 -- Walk upwards in the metatable tree looking for the owner of the function
 -- Returns the _name_ (string)
 -- notion class system specific, but might be equivalent to replace .__parent with get
