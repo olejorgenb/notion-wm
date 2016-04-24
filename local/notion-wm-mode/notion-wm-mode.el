@@ -66,15 +66,10 @@
       (insert (replace-regexp-in-string "^" "-- " result))
       (newline))))
 
-
-(defun notion-wm-run-notionflux (cmd &optional is-expr)
-  "If `IS-EXPR` is true, prepend \"return \" to CMD causing the result to be
-returned "
-  ;; Could add return statment at last line to better support multi line code which ends in an expression
-  (let ((cmd (if is-expr
-                 (format "return emacs.pprint(%s)" cmd)
-               cmd)))
-    (shell-command-to-string (concat "notionflux -e " (shell-quote-argument cmd)))))
+(defun notion-wm-run-notionflux (cmd)
+  (let* ((wrapped (format "return emacs.eval(%s)" (lua-make-lua-string cmd)))
+         (notionflux-cmd (concat "notionflux -e " (shell-quote-argument wrapped))))
+    (message (shell-command-to-string notionflux-cmd))))
 
 (defun notion-wm-send-string (str)
   "Send STR to notion, using the notionflux program."
@@ -84,8 +79,7 @@ returned "
   "Send send the region to notion, using the notionflux program."
   (interactive "r" "P")
   (notion-wm--maybe-insert-result
-   (notion-wm-run-notionflux (buffer-substring start end) insert-result)
-   insert-result))
+   (notion-wm-run-notionflux (buffer-substring start end) insert-result)))
 
 (defun notion-wm-send-current-line (&optional insert-result)
   "Send send the actual line to notion, using the notionflux program."
@@ -113,7 +107,7 @@ returned "
   "Send a command to notion.
 The command is prefixed by a return statement."
   (interactive "sNotion cmd: ")
-  (let ((result (notion-wm-run-notionflux (concat "return " cmd))))
+  (let ((result (notion-wm-run-notionflux cmd)))
     (when (interactive-p)
       (message result))
     result))
