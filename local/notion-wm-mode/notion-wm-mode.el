@@ -50,22 +50,38 @@
 (defvar notion-wm-documentation-url
   "http://notion.sourceforge.net/notionconf/")
 
-(defun notion-wm-run-notionflux (cmd)
-  (shell-command-to-string (concat "notionflux -e " (shell-quote-argument cmd))))
+(defun notion-wm--maybe-insert-result (result insert-result)
+  (when insert-result
+    (save-excursion
+      (forward-line)
+      (insert (replace-regexp-in-string "^" "-- " result))
+      (newline))))
+
+
+(defun notion-wm-run-notionflux (cmd &optional is-expr)
+  "If `IS-EXPR` is true, prepend \"return \" to CMD causing the result to be
+returned "
+  ;; Could add return statment at last line to better support multi line code which ends in an expression
+  (let ((cmd (if is-expr
+                 (format "return emacs.pprint(%s)" cmd)
+               cmd)))
+    (shell-command-to-string (concat "notionflux -e " (shell-quote-argument cmd)))))
 
 (defun notion-wm-send-string (str)
   "Send STR to notion, using the notionflux program."
   (notion-wm-run-notionflux str))
 
-(defun notion-wm-send-region (start end)
+(defun notion-wm-send-region (start end &optional insert-result)
   "Send send the region to notion, using the notionflux program."
-  (interactive "r")
-  (notion-wm-run-notionflux (buffer-substring start end)))
+  (interactive "r" "P")
+  (notion-wm--maybe-insert-result
+   (notion-wm-run-notionflux (buffer-substring start end) insert-result)
+   insert-result))
 
-(defun notion-wm-send-current-line ()
+(defun notion-wm-send-current-line (&optional insert-result)
   "Send send the actual line to notion, using the notionflux program."
-  (interactive)
-  (notion-wm-run-notionflux (buffer-substring (line-beginning-position) (line-end-position))))
+  (interactive "P")
+  (notion-wm-send-region (line-beginning-position) (line-end-position) insert-result))
 
 (defun notion-wm-send-proc ()
   "Send proc around point to notion."
@@ -116,9 +132,12 @@ The command is prefixed by a return statement."
 (defun notion-wm-look-up-notion-function-at-point ()
   (interactive)
   ;; Documentation still uses ioncore instead of notioncore
-  (let* ((funcname (replace-regexp-in-string "^notioncore\\." "ioncore." (lua-funcname-at-point)))
+  (let* ((funcname (replace-regexp-in-string "^notioncore\\." "ioncore."
+                                             (lua-funcname-at-point)))
+         (lua-req (format "return emacs.canonical_funcname(\"%s\")" funcname))
+         (canonical-funcname (read (notion-wm-send-string lua-req))) ;; CLEANUP
          (url (concat notion-wm-documentation-url
-                     "node7.html#fn:" funcname)))
+                      "node7.html#fn:" canonical-funcname)))
     (browse-url url))
   )
 
