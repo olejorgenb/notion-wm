@@ -38,7 +38,6 @@ function emacs.smart_loadstring(lua_code)
   return fn, err
 end
 
-
 function emacs.eval(lua_code)
   debug.print_line(lua_code)
   fn, err = emacs.smart_loadstring(lua_code)
@@ -48,7 +47,6 @@ function emacs.eval(lua_code)
     return fn()
   end
 end
-
 
 
 -- Walk upwards in the metatable tree looking for the owner of the function
@@ -94,85 +92,3 @@ function emacs.canonical_funcname(fname)
 
   return owner.__typename.."."..funpart
 end
-
-WMPlex.geom
-
-WGroupWS == amt.__index
--- true
--- 
-a = current_workspace()
-amt = getmetatable(a)
-amt.__index
-idx = amt.__index
-idx.
-a:geom
--- function: 0x14a5b20
--- 
--- function: 0x14a5b20
--- 
-
-b={}
-type(b)
--- "table"
--- 
-type(a)
--- "userdata"
--- 
-type(WMPlex)
--- "table"
--- 
-getmetatable(WMPlex) == getmetatable(getmetatable (WMPlex))
--- false
--- 
-
-emacs.canonical_funcname("WMPlex.geom")
--- "WRegion.geom"
--- 
--- "WRegion"
--- 
-
-a = current_workspace()
-a.__parentclass
--- "\
--- bottom: function: 0x152f6e0\
--- attach: function: 0x152f650\
--- managed_i: function: 0x152f940\
--- __typename: WGroup\
--- set_bottom: function: 0x152f8d0\
--- set_fullscreen: function: 0x152f750\
--- __parentclass: \
--- +-rootwin_of: function: 0x152c780\
--- +-screen_of: function: 0x1529810\
--- +-set_activity: function: 0x152cfc0\
--- +-manager: function: 0x15298c0\
--- +-current: function: 0x1529730\
--- +-set_tagged: function: 0x15297a0\
--- +-groupleader_of: function: 0x152d640\
--- +-goto: function: 0x1529850\
--- +-geom: function: 0x152d4f0\
--- +-is_active: function: 0x152c9b0\
--- +-goto_focus: function: 0x1529930\
--- +-parent: function: 0x152ca20\
--- +-rqclose: function: 0x15296c0\
--- +-rqorder: function: 0x152cf50\
--- +-is_activity: function: 0x152d560\
--- +-set_name_exact: function: 0x152d1b0\
--- +-get_configuration: function: 0x152d360\
--- +-__typename: WRegion\
--- +-size_hints: function: 0x152d030\
--- +-rqclose_propagate: function: 0x152d230\
--- +-name: function: 0x152d480\
--- +-goto_: function: 0x152d2e0\
--- +-__return_target: function: 0x152d270\
--- +-begin_kbresize: function: 0x152d6b0\
--- +-is_mapped: function: 0x152d140\
--- +-__parentclass: \
--- | +-__typename: Obj\
--- +-is_tagged: function: 0x152d5d0\
--- +-rqgeom: function: 0x152d440\
--- +-set_name: function: 0x152d0a0\
--- +-display: function: 0x152d3d0\
--- attach_new: function: 0x152f5e0"
--- -- "WGroup"
--- table: 0x152f3c0
-;; userdata: 0x1676ac8
