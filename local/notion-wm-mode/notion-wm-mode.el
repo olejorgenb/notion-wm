@@ -79,7 +79,7 @@
   "Send send the region to notion, using the notionflux program."
   (interactive "r" "P")
   (notion-wm--maybe-insert-result
-   (notion-wm-run-notionflux (buffer-substring start end) insert-result)))
+   (notion-wm-run-notionflux (buffer-substring start end)) insert-result))
 
 (defun notion-wm-send-current-line (&optional insert-result)
   "Send send the actual line to notion, using the notionflux program."
