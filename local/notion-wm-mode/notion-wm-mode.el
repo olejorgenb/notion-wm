@@ -235,6 +235,9 @@ The command is prefixed by a return statement."
     (browse-url url))
   )
 
+(defun notion-wm-eldoc (function-name)
+  (read (notion-wm-send-string (format "return emacs.eldoc(\"%s\")" function-name))))
+
 ;; --------------------------------------------------------------------------------
 ;; The notion edit mode, based on lua mode
 ;; --------------------------------------------------------------------------------

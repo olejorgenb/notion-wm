@@ -32,6 +32,7 @@
 (defconst notion-wm-packages
   '(company
     lua-mode
+    (lua-eldoc-mode :location local)
     (notion-wm-mode :location local)
     (company-notion-wm :location local)
     flycheck)
@@ -65,6 +66,9 @@ Each entry is either:
 (defun notion-wm/init-notion-wm-mode ()
   (use-package notion-wm-mode
     :commands (notion-wm-mode)
+    :init
+    (progn
+      (add-hook 'notion-wm-mode-hook #'lua-eldoc-mode))
     :config
     (progn
       ;; (spacemacs/set-leader-keys-for-major-mode 'notion-wm-mode "db" 'notion-wm-send-buffer)
@@ -88,6 +92,9 @@ Each entry is either:
       ;; (require 'company)
       (push 'company-notion-wm company-backends-notion-wm-mode)
       )))
+
+(defun notion-wm/init-lua-eldoc-mode ()
+  (use-package lua-eldoc-mode))
 
 (defun notion-wm/post-init-flycheck ()
   (spacemacs/add-flycheck-hook 'notion-wm-mode))

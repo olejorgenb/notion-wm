@@ -67,7 +67,6 @@ function emacs.smart_loadstring(lua_code)
 end
 
 function emacs.eval(lua_code)
-  debug.print_line(lua_code)
   fn, err = emacs.smart_loadstring(lua_code)
   if err then
     error(err)
@@ -95,6 +94,7 @@ function emacs.function_owner(tab, funstr)
   end
 end
 
+
 function emacs.canonical_funcname(fname)
   -- fname: WMPlex.geom or 
   funpart, tabpart = parse_fname(fname)
@@ -119,4 +119,54 @@ function emacs.canonical_funcname(fname)
   end
 
   return owner.__typename.."."..funpart
+end
+
+-- Possible mechanism for eldoc
+function getArgs(fun)
+  -- http://stackoverflow.com/a/29246308/1517969
+  local args = {}
+  local hook = debug.gethook()
+
+  local argHook = function( ... )
+    local info = debug.getinfo(3)
+    if 'pcall' ~= info.name then return end
+    
+    for i = 1, 10 do
+      local name, value = debug.getlocal(2, i)
+      if '(*temporary)' == name then
+        debug.sethook(hook)
+        error('')
+        return
+      end
+      table.insert(args,name)
+    end
+  end
+  
+  debug.sethook(argHook, "c")
+  pcall(fun)
+  
+  return args
+end
+
+function emacs.eldoc(function_name)
+  debug.print_line(function_name)
+  local get_func, err = loadstring("return "..function_name)
+  if err then
+    return nil
+  end
+
+  local func = get_func()
+  if type(func) ~= "function" then
+    return nil
+  end
+
+  local args = getArgs(func)
+  local eldoc = function_name.." ("
+  if next(args) then
+    eldoc = eldoc..table.concat(args, ", ")
+  else
+    eldoc = eldoc.." ? "
+  end
+  eldoc = eldoc..")"
+  return eldoc
 end

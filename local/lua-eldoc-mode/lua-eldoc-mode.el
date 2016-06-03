@@ -213,9 +213,10 @@
         (when (not (null function-name))
           ;; If `function-name' contains the ":" character then instead
           ;; of searching for e.g. "string.len", try to find only "len"
-          (if (s-contains? ":" function-name)
-            (cdr (assoc (-last-item (s-split ":" function-name)) lua-eldoc-mode-standard-functions))
-            (cdr (assoc function-name lua-eldoc-mode-standard-functions))))))))
+          (or (if (s-contains? ":" function-name)
+                  (cdr (assoc (-last-item (s-split ":" function-name)) lua-eldoc-mode-standard-functions))
+                (cdr (assoc function-name lua-eldoc-mode-standard-functions)))
+              (notion-wm-eldoc function-name)))))))
 
 
 ;;;###autoload
