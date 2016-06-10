@@ -47,7 +47,11 @@
 ;; notion interaction via notionflux
 ;; --------------------------------------------------------------------------------
 
-(defvar notion-wm-documentation-url
+(defconst notion-wm--lua-helper-path
+  (concat (file-name-directory (or load-file-name buffer-file-name))
+          "emacs.lua"))
+
+(defconst notion-wm-documentation-url
   "http://notion.sourceforge.net/notionconf/")
 
 (defun notion-wm--name-at-point ()
@@ -59,17 +63,42 @@
     (modify-syntax-entry ?: "_")
     (current-word t)))
 
-(defun notion-wm--maybe-insert-result (result insert-result)
-  (when insert-result
-    (save-excursion
-      (forward-line)
-      (insert (replace-regexp-in-string "^" "-- " result))
-      (newline))))
+(defun notion-wm-run-notionflux-interactively (cmd insert-result show-result)
+  "Helper that handles common options relevant for interactive commands "
+  (let ((result (notion-wm-run-notionflux cmd)))
+    (when insert-result
+      (save-excursion
+        (forward-line)
+        (insert (replace-regexp-in-string "^" "-- " result))
+        (newline)))
+    (when show-result
+      (message result))
+    result))
 
 (defun notion-wm-run-notionflux (cmd)
   (let* ((wrapped (format "return emacs.eval(%s)" (lua-make-lua-string cmd)))
-         (notionflux-cmd (concat "notionflux -e " (shell-quote-argument wrapped))))
-    (message (shell-command-to-string notionflux-cmd))))
+         (exit-code nil)
+         (result nil))
+    (with-temp-buffer
+      ;; notionflux have a relative low limit on data accepted as arguments so
+      ;; we need to pass the code through stdin.
+
+      ;; Emacs seems to use buffers instead of stream objects communication
+      ;; with external processes.
+
+      (insert (format "if emacs == undefined then loadfile('%s')() end\n"
+                      notion-wm--lua-helper-path))
+      (insert wrapped)
+
+      ;; Call notion flux with the temp buffer content, replacing it with the
+      ;; output. (both stdout and stderr)
+      (setq exit-code
+            (call-process-region (point-min) (point-max) "notionflux" t t))
+      (setq result (buffer-string))
+      (when (< 0 exit-code)
+        (error "notionflux failed (%s): %s" exit-code result))
+      result)
+    ))
 
 (defun notion-wm-send-string (str)
   "Send STR to notion, using the notionflux program."
@@ -77,14 +106,15 @@
 
 (defun notion-wm-send-region (start end &optional insert-result)
   "Send send the region to notion, using the notionflux program."
-  (interactive "r" "P")
-  (notion-wm--maybe-insert-result
-   (notion-wm-run-notionflux (buffer-substring start end)) insert-result))
+  (interactive "r\nP")
+  (notion-wm-run-notionflux-interactively (buffer-substring start end)
+                                          insert-result (called-interactively-p)))
 
 (defun notion-wm-send-current-line (&optional insert-result)
   "Send send the actual line to notion, using the notionflux program."
   (interactive "P")
-  (notion-wm-send-region (line-beginning-position) (line-end-position) insert-result))
+  (notion-wm-run-notionflux-interactively (buffer-substring (line-beginning-position) (line-end-position))
+                                          insert-result (called-interactively-p)))
 
 (defun notion-wm-send-proc ()
   "Send proc around point to notion."
@@ -103,14 +133,11 @@
   (notion-wm-send-region (point-min) (point-max)))
 
 
-(defun notion-wm-cmd (cmd)
+(defun notion-wm-cmd (cmd &optional insert-result)
   "Send a command to notion.
 The command is prefixed by a return statement."
-  (interactive "sNotion cmd: ")
-  (let ((result (notion-wm-run-notionflux cmd)))
-    (when (interactive-p)
-      (message result))
-    result))
+  (interactive "sNotion cmd: \nP")
+  (notion-wm-run-notionflux-interactively cmd insert-result (called-interactively-p)))
 
 
 ;; --------------------------------------------------------------------------------
