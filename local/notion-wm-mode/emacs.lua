@@ -8,10 +8,38 @@ function emacs.completion_candidates(str)
   return table.concat(completions, " ")
 end
 
+-- Pretty print a notion object.
+-- type(obj) == userdata and obj.__typename exists
+function emacs.pp_notion(obj, short)
+
+  if not obj then
+    return "nil"
+  end
+
+  if short then
+    return obj.__typename.." "..tostring(obj)
+  end
+
+  local repr =        "Type:   "..obj.__typename
+  local sep = "\n  "
+  if obj.name then
+    repr = repr..sep.."Name:   "..obj:name()
+  else
+    repr = repr..sep.."Id:     "..tostring(obj)
+  end
+  repr = repr..sep..  "Parent: "..emacs.pp_notion(obj:parent(), true)
+
+  return repr
+end
+  
+
 -- _Attempts_ to pretty print `obj`
 function emacs.pprint(obj)
-  if type(obj) == "table" then
+  local obj_type = type(obj)
+  if obj_type == "table" then
     return table_to_string(obj)
+  elseif obj_type == "userdata" and obj.__typename then
+    return emacs.pp_notion(obj)
   else
     return obj
   end
@@ -44,7 +72,8 @@ function emacs.eval(lua_code)
   if err then
     error(err)
   else
-    return fn()
+    local result = fn()
+    return emacs.pprint(result)
   end
 end
 

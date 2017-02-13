@@ -72,8 +72,13 @@
     (when insert-result
       (save-excursion
         (forward-line)
-        (insert (replace-regexp-in-string "^" "-- " result))
-        (newline)))
+        (unless (looking-at "--: ")
+          (newline)
+          (forward-line -1))
+
+        (insert (replace-regexp-in-string "^" "--: " result))
+        (while (looking-at "--: ")
+          (kill-whole-line))))
     (when show-result
       (message result))
     result))
@@ -120,6 +125,17 @@
   (interactive "P")
   (notion-wm-run-notionflux-interactively (buffer-substring (line-beginning-position) (line-end-position))
                                           insert-result (called-interactively-p)))
+
+(defun notion-wm-repl ()
+  (interactive)
+  (let ((a)
+        (b))
+    (if (region-active-p)
+        (setq a (point)
+              b (mark))
+      (setq a (line-beginning-position)
+            b (line-end-position)))
+    (notion-wm-run-notionflux-interactively (buffer-substring  a b) t nil)))
 
 (defun notion-wm-send-proc ()
   "Send proc around point to notion."
@@ -188,6 +204,7 @@ The command is prefixed by a return statement."
   (define-key notion-wm-mode-map [(control ?c) (control ?r)] 'notion-wm-send-region)
   (define-key notion-wm-mode-map [(control ?c) (control ?b)] 'notion-wm-send-buffer)
   (define-key notion-wm-mode-map [(control ?c) (control ?l)] 'notion-wm-send-line)
+  (define-key notion-wm-mode-map (kbd "C-<return>") 'notion-wm-repl)
   )
 
 (easy-menu-define notion-wm-mode-menu notion-wm-mode-map
