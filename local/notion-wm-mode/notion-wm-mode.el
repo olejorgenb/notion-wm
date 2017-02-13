@@ -47,6 +47,9 @@
 ;; notion interaction via notionflux
 ;; --------------------------------------------------------------------------------
 
+(defvar notion-wm-display-target ":0"
+  "The DISPLAY to target. Useful when debugging a separate notion in eg. a Xephyr server")
+
 (defconst notion-wm--lua-helper-path
   (concat (file-name-directory (or load-file-name buffer-file-name))
           "emacs.lua"))
@@ -93,7 +96,9 @@
       ;; Call notion flux with the temp buffer content, replacing it with the
       ;; output. (both stdout and stderr)
       (setq exit-code
-            (call-process-region (point-min) (point-max) "notionflux" t t))
+            (let ((process-environment process-environment))
+              (setenv "DISPLAY" notion-wm-display-target)
+              (call-process-region (point-min) (point-max) "notionflux" t t)))
       (setq result (buffer-string))
       (when (< 0 exit-code)
         (error "notionflux failed (%s): %s" exit-code result))
