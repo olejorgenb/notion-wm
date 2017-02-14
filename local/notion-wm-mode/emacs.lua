@@ -87,7 +87,6 @@ function emacs.function_owner(tab, funstr)
     return nil -- we only understand notion classes
   end
   while tab do
-    debug.print_line(tostring(tab))
     if rawget(tab, funstr) then
       return tab
     else
