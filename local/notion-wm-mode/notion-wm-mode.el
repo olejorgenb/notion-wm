@@ -152,6 +152,15 @@
     (let ((cmd (buffer-substring a b)))
       (save-excursion
         (goto-char b)
+
+        (when (eq b (line-beginning-position))
+          ;; What I actually want to check for is if the region is active and is
+          ;; in "line mode". Then b will be at the line _after_ the last code
+          ;; line selected
+
+          ;; Maybe simply back up all blank lines too?
+          (forward-line -1))
+
         (beginning-of-line)
 
         ;; IMPROVEMENT: might want to do this for the normal "send-" functions too?
