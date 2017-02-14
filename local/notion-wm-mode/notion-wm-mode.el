@@ -67,20 +67,34 @@
     (current-word t)))
 
 (defun notion-wm-run-notionflux-interactively (cmd insert-result show-result)
-  "Helper that handles common options relevant for interactive commands "
+  "Helper that handles common options relevant for interactive commands"
+
   (let ((result (notion-wm-run-notionflux cmd)))
+
+    ;; notionflux return strings with line continuation
+    (setq result (replace-regexp-in-string "\\\\$" "" result))
+
     (when insert-result
       (save-excursion
-        (forward-line)
-        (unless (looking-at "--: ")
-          (newline)
-          (forward-line -1))
+        (end-of-line)
+
+        (if (eobp)
+            (newline)
+          (forward-line))
+
+        (while (looking-at "--: ")
+          (kill-whole-line))
+
+        (newline)
+        (forward-line -1)
 
         (insert (replace-regexp-in-string "^" "--: " result))
-        (while (looking-at "--: ")
-          (kill-whole-line))))
+        (kill-whole-line)
+        ))
+
     (when show-result
       (message result))
+
     result))
 
 (defun notion-wm-run-notionflux (cmd)
@@ -128,14 +142,34 @@
 
 (defun notion-wm-repl ()
   (interactive)
-  (let ((a)
-        (b))
+  (let (a b)
     (if (region-active-p)
-        (setq a (point)
-              b (mark))
+        (setq a (min (point) (mark))
+              b (max (point) (mark)))
       (setq a (line-beginning-position)
             b (line-end-position)))
-    (notion-wm-run-notionflux-interactively (buffer-substring  a b) t nil)))
+
+    (let ((cmd (buffer-substring a b)))
+      (save-excursion
+        (goto-char b)
+        (beginning-of-line)
+
+        ;; IMPROVEMENT: might want to do this for the normal "send-" functions too?
+
+        ;; Is the last statement an simple assignment?
+        ;; If so - add a "return variable" to actually see the result
+        ;; NB: This is a "minimal effort" thing. Probably lots of edge-cases with
+        ;; strange behavior. eg. "foo={bar=2} return foo.bar"
+        (search-forward-regexp
+         "^\\s-*\\(?:local\\s-+\\)?\\([.:_a-z]+\\)\\s-*="
+         b t)
+
+        (let ((assigned-variable (match-string 1)))
+          (when assigned-variable
+            (setq cmd (concat cmd " return " assigned-variable)))
+
+          (notion-wm-run-notionflux-interactively cmd t nil)))
+      )))
 
 (defun notion-wm-send-proc ()
   "Send proc around point to notion."
