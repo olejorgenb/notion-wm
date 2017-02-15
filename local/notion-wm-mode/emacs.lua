@@ -121,17 +121,19 @@ function emacs.canonical_funcname(fname)
   return owner.__typename.."."..funpart
 end
 
--- Possible mechanism for eldoc
-function getArgs(fun)
+function introspect_function(fun)
   -- http://stackoverflow.com/a/29246308/1517969
   local args = {}
+  local info = nil
   local hook = debug.gethook()
 
   local argHook = function( ... )
-    local info = debug.getinfo(3)
-    if 'pcall' ~= info.name then return end
-    
-    for i = 1, 10 do
+    local cur_frame = debug.getinfo(3)
+    if not cur_frame or 'pcall' ~= cur_frame.name then return end
+
+    info = debug.getinfo(2)
+
+    for i = 1, 20 do
       local name, value = debug.getlocal(2, i)
       if '(*temporary)' == name then
         debug.sethook(hook)
@@ -145,7 +147,7 @@ function getArgs(fun)
   debug.sethook(argHook, "c")
   pcall(fun)
   
-  return args
+  return args, info
 end
 
 function emacs.eldoc(function_name)
@@ -167,10 +169,15 @@ function emacs.eldoc(function_name)
 
   local funpart, tabpart, sep = parse_fname(function_name)
 
-  local args = getArgs(func)
+  local args, info = introspect_function(func)
+  local is_native = info.what == "C"
 
   if not next(args) then
-    table.insert(args, "?")
+    table.insert(args, "...?")
+  end
+
+  if info.isvararg and not is_native then
+    table.insert(args, "...")
   end
 
   if sep == ":" then
@@ -180,5 +187,11 @@ function emacs.eldoc(function_name)
   local args_str = table.concat(args, ", ")
   local eldoc = canonical_fname.." ("..args_str..")"
 
-  return eldoc
+  local native_marker = ""
+  if is_native then
+    native_marker = "   ".."["..info.what.."]"
+  end
+
+  return eldoc..native_marker
 end
+
