@@ -162,8 +162,8 @@ function emacs.eldoc(function_name)
     return nil
   end
 
-  local func = get_func()
-  if type(func) ~= "function" then
+  local ok, func = pcall(get_func)
+  if not ok or  type(func) ~= "function" then
     return nil
   end
 
@@ -205,8 +205,8 @@ function emacs.defined_at(function_name)
     return nil
   end
 
-  local func = get_func()
-  if type(func) ~= "function" then
+  local ok, func = pcall(get_func)
+  if not ok or  type(func) ~= "function" then
     return nil
   end
 
