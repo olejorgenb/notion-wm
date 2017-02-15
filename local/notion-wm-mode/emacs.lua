@@ -54,7 +54,7 @@ function parse_fname(fname)
   else
     funpart = fname
   end
-  return funpart, tabpart
+  return funpart, tabpart, dot and string.sub(fname, dot, dot)
 end
 
 
@@ -149,8 +149,13 @@ function getArgs(fun)
 end
 
 function emacs.eldoc(function_name)
-  debug.print_line(function_name)
-  local get_func, err = loadstring("return "..function_name)
+  if string.find(function_name, "[{\"(]") then
+    return -- weird stuff in name, bail (the name would've been eval'ed later)
+  end
+
+  local canonical_fname = emacs.canonical_funcname(function_name)
+
+  local get_func, err = loadstring("return "..canonical_fname)
   if err then
     return nil
   end
@@ -160,13 +165,20 @@ function emacs.eldoc(function_name)
     return nil
   end
 
+  local funpart, tabpart, sep = parse_fname(function_name)
+
   local args = getArgs(func)
-  local eldoc = function_name.." ("
-  if next(args) then
-    eldoc = eldoc..table.concat(args, ", ")
-  else
-    eldoc = eldoc.." ? "
+
+  if not next(args) then
+    table.insert(args, "?")
   end
-  eldoc = eldoc..")"
+
+  if sep == ":" then
+    table.insert(args, 1, tabpart.."?")
+  end
+
+  local args_str = table.concat(args, ", ")
+  local eldoc = canonical_fname.." ("..args_str..")"
+
   return eldoc
 end
