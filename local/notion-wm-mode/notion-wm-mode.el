@@ -238,6 +238,18 @@ The command is prefixed by a return statement."
 (defun notion-wm-eldoc (function-name)
   (read (notion-wm-send-string (format "return emacs.eldoc(\"%s\")" function-name))))
 
+(defun notion-wm-goto-definition (function-name)
+  (interactive (list (notion-wm--name-at-point)))
+  ;; Hackety-hack...
+  (let* ((raw (notion-wm-send-string (format "return emacs.defined_at(\"%s\")" function-name)))
+         (as-string (and raw (read raw)))
+         (location (and as-string (read as-string))))
+    (when location
+      (find-file (car location))
+      (goto-line (cadr location)))
+
+    location))
+
 ;; --------------------------------------------------------------------------------
 ;; The notion edit mode, based on lua mode
 ;; --------------------------------------------------------------------------------

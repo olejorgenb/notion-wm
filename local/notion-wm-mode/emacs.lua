@@ -195,3 +195,26 @@ function emacs.eldoc(function_name)
   return eldoc..native_marker
 end
 
+function emacs.defined_at(function_name)
+  if string.find(function_name, "[{\"(]") then
+    return -- weird stuff in name, bail (the name would've been eval'ed later)
+  end
+
+  local get_func, err = loadstring("return "..function_name)
+  if err then
+    return nil
+  end
+
+  local func = get_func()
+  if type(func) ~= "function" then
+    return nil
+  end
+
+  local args, info = introspect_function(func)
+  if info.source and string.sub(info.source, 1, 1) == "@" then
+    return "("..'"'..string.sub(info.source, 2)..'"' .. " " .. tostring(info.linedefined)..")"
+  end
+
+  return nil
+
+end
