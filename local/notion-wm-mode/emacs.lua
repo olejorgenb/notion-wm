@@ -2,6 +2,8 @@
 
 emacs = {}
 
+emacs.verbose = true
+
 function emacs.completion_candidates(str)
   local env = _ENV or getfenv()
   local completions = mod_query.do_complete_lua(env, str)
@@ -69,6 +71,9 @@ function emacs.smart_loadstring(lua_code)
 end
 
 function emacs.eval(lua_code)
+  if emacs.verbose then 
+    debug.print_line(lua_code)
+  end
   fn, err = emacs.smart_loadstring(lua_code)
   if err then
     error(err)
