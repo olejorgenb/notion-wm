@@ -27,7 +27,9 @@ function emacs.pp_notion(obj, short)
   else
     repr = repr..sep.."Id:     "..tostring(obj)
   end
-  repr = repr..sep..  "Parent: "..emacs.pp_notion(obj:parent(), true)
+  if obj.parent then
+    repr = repr..sep..  "Parent: "..emacs.pp_notion(obj:parent(), true)
+  end
 
   return repr
 end
