@@ -187,8 +187,9 @@ function emacs.eldoc(function_name)
     table.insert(args, "...")
   end
 
-  if sep == ":" then
-    table.insert(args, 1, tabpart.."?")
+  if sep == ":" and canonical_fname ~= function_name then
+    if is_native then table.insert(args, 1, "?") end
+    args[1] = args[1].."="..tabpart
   end
 
   local args_str = table.concat(args, ", ")
