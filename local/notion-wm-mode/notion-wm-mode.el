@@ -238,17 +238,36 @@ The command is prefixed by a return statement."
 (defun notion-wm-eldoc (function-name)
   (read (notion-wm-send-string (format "return emacs.eldoc(\"%s\")" function-name))))
 
+(defun notion-wm--resolve-lua-source-file (relative-path)
+  ;; Byte compiled lua files contain file _name_ at best
+  (let* ((candidates
+          (remove-if-not (lambda (project-file-path)
+                           (string-suffix-p relative-path project-file-path))
+                         (projectile-current-project-files)))
+         (project-file (if (rest candidates)
+                           (completing-read "Source file" candidates)
+                         (first candidates))))
+    (if project-file
+        (concat (projectile-project-root) project-file)
+      (helm-find-files-1 relative-path))))
+
 (defun notion-wm-goto-definition (function-name)
   (interactive (list (notion-wm--name-at-point)))
   ;; Hackety-hack...
   (let* ((raw (notion-wm-send-string (format "return emacs.defined_at(\"%s\")" function-name)))
          (as-string (and raw (read raw)))
          (location (and as-string (read as-string))))
-    (when location
-      (find-file (car location))
-      (goto-line (cadr location)))
 
-    location))
+    (when location
+      (let* ((path          (car location))
+             (line-number   (cadr location))
+             (resolved-path (if (file-name-absolute-p path)
+                                path
+                              (notion-wm--resolve-lua-source-file path))))
+        (when resolved-path
+          (find-file resolved-path)
+          (goto-line line-number)
+          resolved-path)))))
 
 ;; --------------------------------------------------------------------------------
 ;; The notion edit mode, based on lua mode
