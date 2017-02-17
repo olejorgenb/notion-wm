@@ -169,11 +169,11 @@
         ;; If so - add a "return variable" to actually see the result
         ;; NB: This is a "minimal effort" thing. Probably lots of edge-cases with
         ;; strange behavior. eg. "foo={bar=2} return foo.bar"
-        (search-forward-regexp
-         "^\\s-*\\(?:local\\s-+\\)?\\([.:_a-z]+\\)\\s-*="
-         b t)
-
-        (let ((assigned-variable (match-string 1)))
+        
+        (let* ((found-match? (search-forward-regexp
+                              "^\\s-*\\(?:local\\s-+\\)?\\([.:_a-z]+\\)\\s-*="
+                              b t))
+               (assigned-variable (and found-match? (match-string 1))))
           (when assigned-variable
             (setq cmd (concat cmd " return " assigned-variable)))
 
