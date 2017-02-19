@@ -193,6 +193,19 @@
     (set-text-properties 0 (length text) nil text)
     text))
 
+(defun lua-eldoc-mode--doc-for-stdlib (function-name)
+  ;; If `function-name' contains the ":" character then instead
+  ;; of searching for e.g. "string.len", try to find only "len"
+  (if (s-contains? ":" function-name)
+      (cdr (assoc (-last-item (s-split ":" function-name)) lua-eldoc-mode-standard-functions))
+    (cdr (assoc function-name lua-eldoc-mode-standard-functions)))
+  )
+
+(defvar lua-eldoc-mode--last-lookup '("" . "")
+  "eldoc really spams this function. (even when `point' is still it hammers it)
+
+Considering we do a relative expensive lookup we cache the last result in this variable.")
+
 (defun lua-eldoc-mode-help-at-point ()
   "Return the arguments for the standard function at point."
   ;; The `lua-mode' syntax table considers the "." character as a
@@ -211,12 +224,13 @@
         ;; buffer and that line is empty, `function-name' will be NIL,
         ;; which causes `s-contains' to error out.
         (when (not (null function-name))
-          ;; If `function-name' contains the ":" character then instead
-          ;; of searching for e.g. "string.len", try to find only "len"
-          (or (if (s-contains? ":" function-name)
-                  (cdr (assoc (-last-item (s-split ":" function-name)) lua-eldoc-mode-standard-functions))
-                (cdr (assoc function-name lua-eldoc-mode-standard-functions)))
-              (notion-wm-eldoc function-name)))))))
+          (if (equal (car lua-eldoc-mode--last-lookup) function-name)
+              (cdr lua-eldoc-mode--last-lookup)
+            (let ((eldoc (or (lua-eldoc-mode--doc-for-stdlib function-name)
+                             (notion-wm-eldoc function-name))))
+              (setcar lua-eldoc-mode--last-lookup function-name)
+              (setcdr lua-eldoc-mode--last-lookup eldoc)
+              eldoc)))))))
 
 
 ;;;###autoload
