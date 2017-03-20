@@ -90,7 +90,7 @@ Each entry is either:
     :init
     (progn
       ;; (require 'company)
-      (push 'company-notion-wm company-backends-notion-wm-mode)
+      (spacemacs|add-company-backends :backends company-notion-wm :modes notion-wm-mode)
       )))
 
 (defun notion-wm/init-lua-eldoc-mode ()
@@ -100,6 +100,6 @@ Each entry is either:
   (spacemacs/add-flycheck-hook 'notion-wm-mode))
 
 (defun notion-wm/post-init-notion-wm-mode ()
-  (spacemacs|add-company-hook notion-wm-mode))
+  )
 
 ;;; packages.el ends here
